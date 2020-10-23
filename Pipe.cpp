@@ -216,3 +216,4 @@ private:
 		clientSocket = serverSocket = -1;
 	}
 };
+
