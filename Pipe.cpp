@@ -11,34 +11,34 @@
 #include <errno.h>
 #include <list>
 
-extern bool LOG; //делать логирование
-extern bool LINE_BY_LINE; //это 26 лаба
+extern bool LOG; //п╢п╣п╩п╟я┌я▄ п╩п╬пЁп╦я─п╬п╡п╟п╫п╦п╣
+extern bool LINE_BY_LINE; //п╢п╩я▐ 26 п╩п╟п╠я▀
 extern int MAX_STR;
 
-//эту структуру можно использовать только в каком-то контейнере
-//(потому что, когда я её писала, мне взбрело в голову,
-// что так её можно оптимизировать)
+//я█я┌я┐ я│я┌я─я┐п╨я┌я┐я─я┐ п╪п╬п╤п╫п╬ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я┌п╬п╩я▄п╨п╬ п╡ п╨п╟п╨п╬п╪-я┌п╬ п╨п╬п╫я┌п╣п╧п╫п╣я─п╣
+//(п©п╬я┌п╬п╪я┐ я┤я┌п╬, п╨п╬пЁп╢п╟ я▐ п╣я▒ п©п╦я│п╟п╩п╟, п╪п╫п╣ п╡п╥п╠я─п╣п╩п╬ п╡ пЁп╬п╩п╬п╡я┐,
+// я┤я┌п╬ я┌п╟п╨ п╣я▒ п╪п╬п╤п╫п╬ п╬п©я┌п╦п╪п╦п╥п╦я─п╬п╡п╟я┌я▄)
 struct Pipe {
 	int clientSocket;
-	int serverSocket; //сокет туда, куда мы всё транслируем
+	int serverSocket; //я│п╬п╨п╣я┌ я┌я┐п╢п╟, п╨я┐п╢п╟ п╪я▀ п╡я│я▒ я┌я─п╟п╫я│п╩п╦я─я┐п╣п╪
 
-	//данные считываем в буфер, потому что
-	//может возникнуть ситуация, когда
-	//мы считали из одного сокета много байт
-	//а в другой столько не можем записать
+	//п╢п╟п╫п╫я▀п╣ я│я┤п╦я┌я▀п╡п╟п╣п╪ п╡ п╠я┐я└п╣я─, п©п╬я┌п╬п╪я┐ я┤я┌п╬
+	//п╪п╬п╤п╣я┌ п╡п╬п╥п╫п╦п╨п╫я┐я┌я▄ я│п╦я┌я┐п╟я├п╦я▐, п╨п╬пЁп╢п╟
+	//п╪я▀ я│я┤п╦я┌п╟п╩п╦ п╦п╥ п╬п╢п╫п╬пЁп╬ я│п╬п╨п╣я┌п╟ п╪п╫п╬пЁп╬ п╠п╟п╧я┌
+	//п╟ п╡ п╢я─я┐пЁп╬п╧ я│я┌п╬п╩я▄п╨п╬ п╫п╣ п╪п╬п╤п╣п╪ п╥п╟п©п╦я│п╟я┌я▄
 	char *bufClientToServer;
-	char *iptrClientToServer; //куда в буфере пишем
-	char *optrClientToServer; //откуда в буфере читаем
+	char *iptrClientToServer; //п╨я┐п╢п╟ п╡ п╠я┐я└п╣я─п╣ п©п╦я┬п╣п╪
+	char *optrClientToServer; //п╬я┌п╨я┐п╢п╟ п╡ п╠я┐я└п╣я─п╣ я┤п╦я┌п╟п╣п╪
 	int stdineofClientToServer;
 
 	char *bufServerToClient;
-	char *iptrServerToClient; //куда в буфере пишем
-	char *optrServerToClient; //откуда в буфере читаем	
+	char *iptrServerToClient; //п╨я┐п╢п╟ п╡ п╠я┐я└п╣я─п╣ п©п╦я┬п╣п╪
+	char *optrServerToClient; //п╬я┌п╨я┐п╢п╟ п╡ п╠я┐я└п╣я─п╣ я┤п╦я┌п╟п╣п╪	
 	int stdineofServerToClient;
 
-	char ip[16]; //для логов
-	int port;  //тоже для логов
-	int cntStr; //для 26 лабы
+	char ip[16]; //п╢п╩я▐ п╩п╬пЁп╬п╡
+	int port;  //я┌п╬п╤п╣ п╢п╩я▐ п╩п╬пЁп╬п╡
+	int cntStr; //п╢п╩я▐ 26 п╩п╟п╠я▀
 
 	static const int BUF_SIZE = 1024;
 
@@ -52,22 +52,22 @@ struct Pipe {
 
 	Pipe& operator= (const Pipe &pipe) = delete; 
 
-	//при копировании данные из буфера теряются, но они вроде и не нужны
-	//и то, откуда скопировали не надо больше использовать
+	//п©я─п╦ п╨п╬п©п╦я─п╬п╡п╟п╫п╦п╦ п╢п╟п╫п╫я▀п╣ п╦п╥ п╠я┐я└п╣я─п╟ я┌п╣я─я▐я▌я┌я│я▐, п╫п╬ п╬п╫п╦ п╡я─п╬п╢п╣ п╦ п╫п╣ п╫я┐п╤п╫я▀
+	//п╦ я┌п╬, п╬я┌п╨я┐п╢п╟ я│п╨п╬п©п╦я─п╬п╡п╟п╩п╦ п╫п╣ п╫п╟п╢п╬ п╠п╬п╩я▄я┬п╣ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄
 	Pipe(const Pipe &copy) {
 		clientSocket = copy.clientSocket;
 		serverSocket = copy.serverSocket;
 
 		iptrClientToServer = optrClientToServer = bufClientToServer = new char[BUF_SIZE];
 		iptrServerToClient = optrServerToClient = bufServerToClient = new char[BUF_SIZE];
-		strcpy(ip, copy.ip); //использую Си-строки, потому что мне нужно только представление char[]
+		strcpy(ip, copy.ip); //п╦я│п©п╬п╩я▄п╥я┐я▌ п║п╦-я│я┌я─п╬п╨п╦, п©п╬я┌п╬п╪я┐ я┤я┌п╬ п╪п╫п╣ п╫я┐п╤п╫п╬ я┌п╬п╩я▄п╨п╬ п©я─п╣п╢я│я┌п╟п╡п╩п╣п╫п╦п╣ char[]
 		port = copy.port;
 
 		stdineofClientToServer = false;
 		stdineofServerToClient = false;
-		cntStr = 0; //лаба 26
+		cntStr = 0; //п╩п╟п╠п╟ 26
 
-        //чтобы не было двух pipe, работающих с одними сокетами
+        //я┤я┌п╬п╠я▀ п╫п╣ п╠я▀п╩п╬ п╢п╡я┐я┘ pipe, я─п╟п╠п╬я┌п╟я▌я┴п╦я┘ я│ п╬п╢п╫п╦п╪п╦ я│п╬п╨п╣я┌п╟п╪п╦
 		Pipe& cp = const_cast<Pipe&>(copy);
 		cp.clientSocket = -1;
 		cp.serverSocket = -1;
@@ -86,7 +86,7 @@ struct Pipe {
 		return clientSocket == -1;
 	}
 
-	//считаем, что pipe не пуст
+	//я│я┤п╦я┌п╟п╣п╪, я┤я┌п╬ pipe п╫п╣ п©я┐я│я┌
 	bool readClient() {
 		int n = readP(clientSocket, serverSocket, bufClientToServer, &iptrClientToServer, &optrClientToServer, &stdineofClientToServer);
 		if (LOG && n > 0) printf("client %s : %d - client -> proxy - %d bytes\n", ip, port, n);
@@ -97,7 +97,7 @@ struct Pipe {
 		return false;
 	}
 
-	//считаем, что pipe не пуст
+	//я│я┤п╦я┌п╟п╣п╪, я┤я┌п╬ pipe п╫п╣ п©я┐я│я┌
 	bool readServer() {
 		int n = readP(serverSocket, clientSocket, bufServerToClient, &iptrServerToClient, &optrServerToClient, &stdineofServerToClient);
 		if (LOG && n > 0) printf("client %s : %d - server -> proxy - %d bytes\n", ip, port, n);
@@ -108,7 +108,7 @@ struct Pipe {
 		return false;
 	}
 
-	//считаем, что pipe не пуст
+	//я│я┤п╦я┌п╟п╣п╪, я┤я┌п╬ pipe п╫п╣ п©я┐я│я┌
 	bool writeServer() { //?
 		int n = writeP(clientSocket, serverSocket, bufClientToServer, &iptrClientToServer, &optrClientToServer, &stdineofClientToServer);
 		if (LOG && n > 0) printf("client %s : %d - client <- proxy - %d bytes\n", ip, port, n);
@@ -119,7 +119,7 @@ struct Pipe {
 		return false;
 	}
 
-	//считаем, что pipe не пуст
+	//я│я┤п╦я┌п╟п╣п╪, я┤я┌п╬ pipe п╫п╣ п©я┐я│я┌
 	bool writeClient() { //?
 		int n = writeP(serverSocket, clientSocket, bufServerToClient, &iptrServerToClient, &optrServerToClient, &stdineofServerToClient);
 		if (LOG && n > 0) printf("client %s : %d - server <- proxy - %d bytes\n", ip, port, n);
@@ -136,7 +136,7 @@ private:
 		iptrServerToClient = optrServerToClient = bufServerToClient = NULL;
 		inet_ntop(AF_INET, &cliaddr.sin_addr,ip,16);
 		port = ntohs(cliaddr.sin_port);
-		cntStr = 0; //лаба 26
+		cntStr = 0; //п╩п╟п╠п╟ 26
 	}
 
 	Pipe(int pClientSocket, int pServerSocket) : clientSocket(pClientSocket), serverSocket(pServerSocket), stdineofClientToServer(0), stdineofServerToClient(0) {
@@ -144,24 +144,24 @@ private:
 		iptrServerToClient = optrServerToClient = bufServerToClient = NULL;
 		strcpy(ip, "");
 		port = 0;
-		cntStr = 0; //лаба 26
+		cntStr = 0; //п╩п╟п╠п╟ 26
 	}
 
-	//считаем, что Pipe не пуст
+	//я│я┤п╦я┌п╟п╣п╪, я┤я┌п╬ Pipe п╫п╣ п©я┐я│я┌
 	int readP(int socketToRead, int socketToWrite, char *buf, char **iptr, char **optr, int *stdineof) {
 		int n = 0;
 		int cnt = buf + BUF_SIZE - (*iptr);
 		while ((n = read(socketToRead, *iptr, cnt)) < 0) {
-			if (errno == EINTR) {											//если нас вырубили по сигналу, можно забить и сделать в след раз или вот так
+			if (errno == EINTR) {											//п╣я│п╩п╦ п╫п╟я│ п╡я▀я─я┐п╠п╦п╩п╦ п©п╬ я│п╦пЁп╫п╟п╩я┐, п╪п╬п╤п╫п╬ п╥п╟п╠п╦я┌я▄ п╦ я│п╢п╣п╩п╟я┌я▄ п╡ я│п╩п╣п╢ я─п╟п╥ п╦п╩п╦ п╡п╬я┌ я┌п╟п╨
 				continue;											
 			} else if (errno == EWOULDBLOCK) {
 				break;
 			} else {
 				printf("ERROR PIPE 1: read\n");
-				return 0; //что-то другое?
+				return 0; //я┤я┌п╬-я┌п╬ п╢я─я┐пЁп╬п╣?
 			} 
 		}
-		if (n == 0 && cnt > 0) { //0 байтов может быть считано в 2 случаях: EOF и нет места в буфере
+		if (n == 0 && cnt > 0) { //0 п╠п╟п╧я┌п╬п╡ п╪п╬п╤п╣я┌ п╠я▀я┌я▄ я│я┤п╦я┌п╟п╫п╬ п╡ 2 я│п╩я┐я┤п╟я▐я┘: EOF п╦ п╫п╣я┌ п╪п╣я│я┌п╟ п╡ п╠я┐я└п╣я─п╣
 			*stdineof = 1;
 			if (*optr == *iptr) {
 				shutdown(socketToWrite, SHUT_WR);
@@ -173,7 +173,7 @@ private:
 		return n;
 	}
 
-	//считаем, что Pipe не пуст
+	//я│я┤п╦я┌п╟п╣п╪, я┤я┌п╬ Pipe п╫п╣ п©я┐я│я┌
 	int writeP(int socketToRead, int socketToWrite, char *buf, char **iptr, char **optr, int *stdineof) {
 		int n = 0;
 		int cnt = *iptr - *optr;
@@ -192,11 +192,11 @@ private:
 				break;
 			} else {
 				printf("ERROR PIPE 2: write\n");
-				return 0; //что-то другое?
+				return 0; //я┤я┌п╬-я┌п╬ п╢я─я┐пЁп╬п╣?
 			} 
 		}
 		if (n >= 0) {
-			if (LINE_BY_LINE) for (i = 0; i < n; ++i) if ((*optr)[i] == '\n') ++cntStr; //26 лаба
+			if (LINE_BY_LINE) for (i = 0; i < n; ++i) if ((*optr)[i] == '\n') ++cntStr; //26 п╩п╟п╠п╟
 			*optr += n;
 			if (*optr == *iptr) {
 				*optr = *iptr = buf;
