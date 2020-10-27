@@ -74,8 +74,6 @@ struct Pipe {
 	}
 
 	~Pipe() {
-		//close(clientSocket);
-		//close(serverSocket);
 		delete[] bufClientToServer;
 		bufClientToServer = NULL;
 		delete[] bufServerToClient;
