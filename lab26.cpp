@@ -66,7 +66,9 @@ struct MyURL {
 				port = 80;
 			}
 
-			request = "GET " + hostAndAfter.substr(hostAndAfter.find('/') + 1, hostAndAfter.length()) + " HTTP/1.0 \n\n";
+			request = "GET " + hostAndAfter.substr(hostAndAfter.find('/'), hostAndAfter.length()) + " HTTP/1.0\r\n" +
+			"Host: " + host + "\r\n" +
+			"\r\n";
 			std::cout << request << std:: endl;
 		} catch (std :: out_of_range a) {
 			printf("ERROR URL 2: incorrect URL\n");
