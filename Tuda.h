@@ -16,8 +16,8 @@ struct Tuda {
 	int clientSocket;
 
 	//для получения GET запроса
-	ReqBuffer reqBuffer; //нужен, поскольку нужно хранить весь запрос в одно время, но непонятен его размер
-	static const int MAX_CNT_IN_ONE_TIMES = 1024;
+	Request req; //нужен, поскольку нужно хранить весь запрос в одно время, но непонятен его размер
+	static const int MAX_CNT_IN_ONE_TIMES = 5000;
 	char* buf; //нужен, поскольку с ним работает read
 
 	//для записи
@@ -26,6 +26,8 @@ struct Tuda {
 
 	char ip[16]; //для логов
 	int port;  //тоже для логов
+
+	bool error = false;
 
 	Tuda(int clSocket, sockaddr_in cliaddr);
 	Tuda(const Tuda &copy);

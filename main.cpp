@@ -5,13 +5,15 @@
 #include "biblio.h"
 
 bool LOG_CACHE = true; //логирование: из кэша или нет
-bool LOG = false; //логирование: другие записи
+bool LOG = true; //логирование: другие записи
 
 Cache cache;
 fd_set allset;
 int maxfd;
 
 int main(int argc, char **argv) {
+    signal(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
+    
     //РАЗБОР АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
     doOrDie(argc < 2, "ERROR1: param <my port>");
     int MY_PORT = atoi(argv[1]);
@@ -31,6 +33,18 @@ int main(int argc, char **argv) {
     doOrDie(bv < 0, "ERROR6: unable to bind socket. Maybe, you should use another <port>");
     bv = listen(listenfd, 10); //преобразует в пассивный сокет, backlog - мах число соединений, которое ядро может помещать в очереди
     doOrDie(bv < 0, "ERROR7: unable to listen socket. Why? This is really strange");
+    int flags = fcntl(listenfd, F_GETFL, 0);
+    if (flags == -1) {
+        printf("ERROR MAIN fcntl 1: why?\n");
+        close(listenfd);
+        return 0;
+    }
+    flags |= O_NONBLOCK;
+    if (fcntl(listenfd, F_SETFL, flags) == -1) {
+        printf("ERROR MAIN fcntl 2: why?\n");
+        close(listenfd);
+        return 0;
+    }
 
     //ДЛЯ SELECT
     maxfd = listenfd;
@@ -48,6 +62,7 @@ int main(int argc, char **argv) {
         if (timerC >= 100000) {
             cache.clear();
             timerC = 0;
+            printf("1\n");
         }
         ++timerC;
 
@@ -59,7 +74,7 @@ int main(int argc, char **argv) {
         while((nready = select(maxfd + 1, &rset, &wset, NULL, NULL) < 0)) {
             if (errno == ENOMEM) {
                 tudas.pop_back();
-            } else if (errno != EINTR) {
+            } else if ((errno != EINTR) && (errno != EWOULDBLOCK) && (errno != ECONNABORTED) && (errno != EPROTO)) {
                 printf("ERROR11: select. Why?\n");
                 exit(0);
             }
@@ -77,6 +92,7 @@ int main(int argc, char **argv) {
                 printf("ERROR10: i haven't memory for new client\n");
                 close(connfd);
             } else {
+              //  printf("1\n");
                 tudas.push_back(Tuda(connfd, cliaddr));    
                 FD_SET(connfd, &allset);
                 //FD_SET(sockfd, &allset);
@@ -119,13 +135,15 @@ int main(int argc, char **argv) {
         while (itC != endC)
         {
             int serverSocket = (*itC).second -> serverSocket;
-            bool opened = true;;
-            if (FD_ISSET(serverSocket, &wset)) {
-                opened = (*itC).second -> writeProxyToServer();
+            bool opened = true;
+            if (FD_ISSET(serverSocket, &rset)) {
+               // printf("5\n");
+                opened = (*itC).second -> readServerToProxy();
                 --nready;
             }
-            if (opened && FD_ISSET(serverSocket, &rset)) {
-                opened = (*itC).second -> readServerToProxy();
+            if (opened && FD_ISSET(serverSocket, &wset)) {
+              //  printf("4\n");
+                opened = (*itC).second -> writeProxyToServer();
                 --nready;
             }
             if (!opened) {

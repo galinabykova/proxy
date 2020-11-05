@@ -7,37 +7,46 @@ void doOrDie(bool condition, const char* message);
 
 void doOrNot(bool condition, const char* message);
 
-struct ReqBuffer {
-	std::vector<char> v;
-	int cntW = 0;
-	bool isEndToRead = false;
+void addStr(std::vector <char>& v, const std::string s);
 
-	ReqBuffer();
+int updateState(int lastState, std::string s, char c, bool drop);
+
+struct Request {
+	std::vector<char> v;
+	bool isEndToRead = false;
+	int stateConnection = 0;
+	int stateGET = 0;
+	int stateHost = 0;
+	int stateEnd = 0;
+	int skipBefore = 256;
+
+	std::string host = "";
+	std::string strReq;
+
+	Request();
 	void add(const char* buf, int n);
 };
 
-//возвращает строку после первого вхождения header до end
-std::string stringAfter(const std::string& header, ReqBuffer reqBuffer, char end);
-
-//header в виде "header"
-std::string headerValue(std::string header, const ReqBuffer& reqBuffer);
-
-struct Request {
-	std::string host;
-	int port;
-	ReqBuffer request;
-	std::string strReq;
-
-	Request(const ReqBuffer& reqBuffer);
-};
-
 struct Reply {
-	std::string mime;
-	int code;
-	ReqBuffer request;
+	std::vector<char> v;
+	bool isEndToRead = false;
+	int stateConnection = 0;
+	int stateHTTP = 0;
+	int stateMime = 0;
+	int stateEnd = 0;
+	int stateContentLength = 0;
+	int skipBefore = 256;
 
-	//здесь нормально, что ответ не вышел
-	Reply(const ReqBuffer& reqBuffer);
+	std::string mime = "";
+	std::string codeStr = "";
+	std::string contentLengthStr = "";
+	int code;
+	int cntEmptyStr = 0;
+	long contentLength = 0;
+	long cnt = 0;
+	Reply();
+	void add(const char* buf, int n);
+
 };
 
 #endif

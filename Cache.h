@@ -13,7 +13,7 @@ struct Cache
 	int ind = 0; //нужен, чтобы генерировать ключи для некэшируемых
 
 	Cache();
-	Suda* add(ReqBuffer reqBuffer);
+	Suda* add(Request req);
 	void clear();
 	~Cache();
 };

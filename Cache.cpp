@@ -9,29 +9,36 @@ Cache::Cache()
 	m = std::map <std::string, Suda*>();
 }
 
-Suda* Cache::add(ReqBuffer reqBuffer) 
+Suda* Cache::add(Request req) 
 {
-	Request request = Request(reqBuffer);
-	std::string key = request.strReq;
+	std::string key = req.strReq;
 	if (m.find(key) != m.end()) {
 		Suda *suda = m[key];
-		if (suda -> mime != "" && suda -> code == 200) { 
-			if (LOG_CACHE) printf("Use from cache\n");
-			return suda;
-		} else {
-			m[std::to_string(ind)] = suda;
-			++ind;
-		}
+    if (suda -> error) {
+      if (LOG_CACHE) printf("error, I can't use cache\n");
+      m[std::to_string(ind)] = suda;
+      ++ind;
+    } else {
+		  if (suda -> code == 200) { 
+        if (LOG_CACHE) printf("Use from cache\n");
+        return suda;
+		  } else {
+        if (LOG_CACHE) printf("code %d != 200, I can't use cache\n", suda -> code);
+        m[std::to_string(ind)] = suda;
+        ++ind;
+		  }
+    }
 	}
-	Suda* ptr = new Suda(reqBuffer);
-	m[key] = ptr;
-	if (LOG_CACHE) printf("new suda\n");
+	Suda* ptr = new Suda(req);
+	m[key] = ptr;  //на время key
+  ++ind;
+	if (LOG_CACHE) printf("new suda %s\n", key.c_str());
 	return ptr;
 }
 
 void Cache::clear() 
 {
-	std::map <std::string, Suda*> ::iterator it; 
+  	/*std::map <std::string, Suda*> ::iterator it; 
     it = m.begin(); 
     while (it != m.end())
     {
@@ -40,6 +47,7 @@ void Cache::clear()
        	if ((*it).second -> time >= 900) {
        		if ((*it).second -> getCntOfReaders() == 0) {
        			delete[] (*it).second;
+            (*it).second = NULL;
        			it = m.erase(it);
        			if (LOG_CACHE) printf("deleted\n");
        		} else {
@@ -47,10 +55,10 @@ void Cache::clear()
        			(*it).second -> code = 10;
        		}
        	} else {
-       		++((*it).second -> time);
+       		//++((*it).second -> time);
        	} 		
    		++it;
-   	}
+   	}*/
 }
 
 Cache::~Cache() 
