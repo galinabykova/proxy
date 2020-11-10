@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
         {
             int serverSocket = (*itC).second -> serverSocket;
             bool opened = serverSocket != -1; //Suda должна существовать после загрузки, error говорит об ошибке, а socket = -1 о конце
-            if (FD_ISSET(serverSocket, &rset)) {
+            if (opened && FD_ISSET(serverSocket, &rset)) {
                // printf("5\n");
                 opened = (*itC).second -> readServerToProxy();
                 --nready;
