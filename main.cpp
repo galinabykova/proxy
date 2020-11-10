@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
         {
             int serverSocket = (*itC).second -> serverSocket;
             bool opened = !((*itC).second -> error);
-            if (FD_ISSET(serverSocket, &rset)) {
+            if (serverSocket != -1 && FD_ISSET(serverSocket, &rset)) {
                // printf("5\n");
                 opened = (*itC).second -> readServerToProxy();
                 --nready;
