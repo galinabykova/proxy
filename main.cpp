@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
                 opened = (*itC).second -> writeProxyToServer();
                 --nready;
             }
-            if (!opened) {
+            if (!opened && serverSocket != -1) {
                 FD_CLR(serverSocket,&allset);
             }
             ++itC;
