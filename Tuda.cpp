@@ -158,7 +158,7 @@ bool Tuda::writeProxyToClient()
 Tuda::~Tuda() 
 {
 	printf("aaaaaaaa\n");
-	delete[] buf;
+	if (buf!=NULL) delete[] buf;
 	printf("bbbbbbbbbbbb\n");
 	buf = NULL;
 	if (clientSocket != -1) {
