@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
         if (timerC >= 100000) {
             cache.clear();
             timerC = 0;
-            printf("1\n");
+            //printf("1\n");
         }
         ++timerC;
 

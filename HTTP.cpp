@@ -70,9 +70,9 @@ void Request::add(const char* buf, int n)
 				skipBefore = '\r';
 			}
 			if (buf[i] == '\r') {
-				skipBefore =256;
+				skipBefore = 256;
 			}
-			v.push_back(buf[i]);
+			if (buf[i] != ' ') v.push_back(buf[i]);//???
 			continue;
 		}
 		v.push_back(buf[i]);
@@ -117,7 +117,7 @@ void Reply::add(const char* buf, int n)
 			stateEnd = updateState(stateEnd, "\r\n\r\n", buf[i], true); 
 			continue;
 		}
-		stateConnection = updateState(stateConnection, "\nConnection:", buf[i], true);
+		stateConnection = updateState(stateConnection, "\nConnection:", buf[i], true); //????????7
 		if (stateConnection == 12) {
 			v.push_back(buf[i]);
 			addStr(v, " close");
@@ -173,15 +173,16 @@ void Reply::add(const char* buf, int n)
 		if (stateContentLength == 18) {
 			try{
 				contentLength = stol(contentLengthStr);
-				std::cout<<contentLength<<std::endl;
+				//std::cout<<contentLength<<std::endl;
 			} catch (std::invalid_argument a) {
 				contentLength = 0;
 			}	
 			++stateContentLength;
 		}
 		stateEnd = updateState(stateEnd, "\r\n\r\n", buf[i], true);
+		//stateEndEnd = updateState(stateEnd, "\r\n\r\n\r\n", buf[i], true);
 	}
-	if (cnt == contentLength) {
+	if (cnt == contentLength/* || stateEndEnd == 6*/) {
 		isEndToRead = true;
 	}
 }

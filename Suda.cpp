@@ -186,6 +186,10 @@ bool Suda::writeProxyToServer()
 		} 
 	}
 	if (n > 0) {
+		/*for (int i=0; i<n; ++i) {
+			printf("%c", ptr[i]);
+		}*/
+		//printf("\n");
 		indexNext +=n;
 		if (LOG && (n > 0)) printf("proxy -> server %s : %d - %d bytes\n", ip, port, n);
 	}
