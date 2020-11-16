@@ -15,6 +15,7 @@ struct Request {
 	std::vector<char> v;
 	bool isEndToRead = false;
 	int stateConnection = 0;
+	int stateProxyConnection = 0;
 	int stateGET = 0;
 	int stateHost = 0;
 	int stateEnd = 0;
@@ -31,9 +32,11 @@ struct Reply {
 	std::vector<char> v;
 	bool isEndToRead = false;
 	int stateConnection = 0;
+	int stateProxyConnection = 0;
 	int stateHTTP = 0;
 	int stateMime = 0;
 	int stateEnd = 0;
+	//int stateEndEnd = 0;
 	int stateContentLength = 0;
 	int skipBefore = 256;
 
