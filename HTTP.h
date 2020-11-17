@@ -36,7 +36,6 @@ struct Reply {
 	int stateHTTP = 0;
 	int stateMime = 0;
 	int stateEnd = 0;
-	//int stateEndEnd = 0;
 	int stateContentLength = 0;
 	int skipBefore = 256;
 

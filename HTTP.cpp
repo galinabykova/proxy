@@ -36,6 +36,24 @@ Request::Request()
 	v = std::vector <char>();
 }
 
+
+std::string withoutHost(std::string URL) {
+	try {
+		if (URL.find("http:", 0) != 0) return URL;
+		std :: string withoutScheme = URL.substr(5, URL.length());
+		std :: string hostAndAfter;
+		size_t pos;
+		if ((pos = withoutScheme.find('@')) != std :: string :: npos) {
+			hostAndAfter = withoutScheme.substr(pos+1, withoutScheme.length());
+		} else {
+			hostAndAfter = withoutScheme.substr(2, withoutScheme.length());
+		}
+		return hostAndAfter.substr(hostAndAfter.find('/'), hostAndAfter.length());
+	} catch (std :: out_of_range a) {
+		return URL;
+	} 
+} 
+
 void Request::add(const char* buf, int n) 
 {
 	for (int i=0; i<n; ++i) {
@@ -63,16 +81,19 @@ void Request::add(const char* buf, int n)
 			continue;
 		}
 		if (stateGET == 5) {
-			strReq += buf[i];
+			//strReq += buf[i];
 			if (buf[i] == ' ' || buf[i] == '\r') {
-				addStr(v, " HTTP/1.0");
+				addStr(v, withoutHost(strReq));
+				addStr(v, " HTTP/1.1"); //тут 1.1, потому что с 1.0 fit.nsu.ru не закрывает соединение. Не понимаю, почему, но так работает, так что пусть будет так
 				++stateGET;
 				skipBefore = '\r';
 			}
+			strReq += buf[i];
 			if (buf[i] == '\r') {
 				skipBefore = 256;
+				v.push_back('\r'); //????
 			}
-			if (buf[i] != ' ') v.push_back(buf[i]);//???
+		//	if (buf[i] != ' ') v.push_back(buf[i]);
 			continue;
 		}
 		v.push_back(buf[i]);
@@ -90,6 +111,10 @@ void Request::add(const char* buf, int n)
 		}
 		stateEnd = updateState(stateEnd, "\r\n\r\n", buf[i], true);
 		if (stateEnd == 4) {
+			if (stateConnection < 12) {
+				for (int i=0; i<2; ++i) v.pop_back();
+				addStr(v, "Connection: close\r\n\r\n");
+			}
 			isEndToRead = true;
 			strReq += host;
 		}
@@ -128,7 +153,7 @@ void Reply::add(const char* buf, int n)
 		stateHTTP = updateState(stateHTTP, "HTTP/", buf[i], true);
 		if (stateHTTP == 5) {
 			v.push_back(buf[i]);
-			addStr(v, "1.0");
+			addStr(v, "1.1");
 			skipBefore = ' ';
 			++stateHTTP;
 			continue;
@@ -183,6 +208,10 @@ void Reply::add(const char* buf, int n)
 		//stateEndEnd = updateState(stateEnd, "\r\n\r\n\r\n", buf[i], true);
 	}
 	if (cnt == contentLength/* || stateEndEnd == 6*/) {
+		if (stateConnection < 12) {
+			for (int i=0; i<2; ++i) v.pop_back();
+			addStr(v, "Connection: close\r\n\r\n");
+		}
 		isEndToRead = true;
 	}
 }
@@ -207,4 +236,15 @@ int main() {
 	}
 	std::cout << std::endl << reply.code << std::endl << reply.isEndToRead << std::endl << reply.mime << std::endl;
 }
+*/
+
+/*
+if (stateEnd == 4) {
+			/*if (stateConnection < 12) {
+				for (int i=0; i<2; ++i) v.pop_back();
+				addStr(v, "Connection: close\r\n\r\n");
+			}*//*
+			isEndToRead = true;
+			strReq += host;
+		}
 */
