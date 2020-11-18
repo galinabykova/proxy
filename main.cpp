@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 
     for(;;) {
         //время от времени очищаем кэш
-        if (timerC >= 100000) {
+        if (timerC >= 10000) {
             cache.clear();
             timerC = 0;
             //printf("1\n");
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
         rset = wset = allset;
         FD_CLR(listenfd, &wset);
         int nready;
-        while((nready = select(maxfd + 1, &rset, &wset, NULL, NULL) < 0)) {
+        while((nready = select(maxfd + 1, &rset, &wset, NULL, NULL)) <= 0) {
             if (errno == ENOMEM) {
                 tudas.pop_back();
             } else if ((errno != EINTR) && (errno != EWOULDBLOCK) && (errno != ECONNABORTED) && (errno != EPROTO)) {
