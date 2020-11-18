@@ -84,7 +84,7 @@ void Request::add(const char* buf, int n)
 			//strReq += buf[i];
 			if (buf[i] == ' ' || buf[i] == '\r') {
 				addStr(v, withoutHost(strReq));
-				addStr(v, " HTTP/1.1"); //тут 1.1, потому что с 1.0 fit.nsu.ru не закрывает соединение. Не понимаю, почему, но так работает, так что пусть будет так
+				addStr(v, " HTTP/1.0"); 
 				++stateGET;
 				skipBefore = '\r';
 			}
@@ -153,7 +153,7 @@ void Reply::add(const char* buf, int n)
 		stateHTTP = updateState(stateHTTP, "HTTP/", buf[i], true);
 		if (stateHTTP == 5) {
 			v.push_back(buf[i]);
-			addStr(v, "1.1");
+			addStr(v, "1.0");
 			skipBefore = ' ';
 			++stateHTTP;
 			continue;
@@ -206,12 +206,14 @@ void Reply::add(const char* buf, int n)
 		}
 		stateEnd = updateState(stateEnd, "\r\n\r\n", buf[i], true);
 		//stateEndEnd = updateState(stateEnd, "\r\n\r\n\r\n", buf[i], true);
+		if (stateEnd == 4) {
+			if (stateConnection < 12) {
+				for (int i=0; i<2; ++i) v.pop_back();
+				addStr(v, "Connection: close\r\n\r\n");
+			}
+		}
 	}
 	if (cnt == contentLength/* || stateEndEnd == 6*/) {
-		if (stateConnection < 12) {
-			for (int i=0; i<2; ++i) v.pop_back();
-			addStr(v, "Connection: close\r\n\r\n");
-		}
 		isEndToRead = true;
 	}
 }
