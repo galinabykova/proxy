@@ -10,7 +10,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <list>
+#include <signal.h>
 #include "Pipe.cpp"
+
+struct sigaction stp;
 
 int MY_PORT, PORT;
 const char *IP;
@@ -34,9 +37,12 @@ void doOrNot(bool condition, const char* message) {
 }
 
 int main(int argc, char **argv) {
+    stp.sa_handler = SIG_IGN;
+    sigaction(SIGPIPE, &stp, 0);
+
     //РАЗБОР АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
     doOrdie(argc != 4, "ERROR1: param <my port> <ip> <port>");
-
+    
     MY_PORT = atoi(argv[1]);
     doOrdie(MY_PORT == 0, "ERROR2: incorrect <my port>"); //0 - некорректное значение, так как в этом случае порт будет выбран динамически
 
