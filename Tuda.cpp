@@ -45,7 +45,7 @@ bool Tuda::readClientToProxy()
 	if (error) {
 		close(clientSocket);
 		clientSocket = -1;
-		if (LOG) printf("client %s : %d closed\n", ip, port);
+		log("client %s : %d closed\n", ip, port);
 		return false;
 	}
 	int n = 0;
@@ -60,13 +60,13 @@ bool Tuda::readClientToProxy()
 			error = true;
 			close(clientSocket);
 			clientSocket = -1;
-			if (LOG) printf("client %s : %d closed\n", ip, port);
+			log("client %s : %d closed\n", ip, port);
 			return false; //что-то другое?
 		} 
 	}
 	if (n > 0) {
 		req.add(buf, n);
-		if (LOG && (n > 0)) printf("client %s : %d -> proxy - %d bytes\n", ip, port, n);
+		if (n > 0) log("client %s : %d -> proxy - %d bytes\n", ip, port, n);
 		if (req.isEndToRead) {
 /*
 			int size = req.v.size();
@@ -100,7 +100,7 @@ bool Tuda::writeProxyToClient()
 	if (error) {
 		close(clientSocket);
 		clientSocket = -1;
-		if (LOG) printf("client %s : %d closed\n", ip, port);
+		log("client %s : %d closed\n", ip, port);
 		return false;
 	}
 	if (suda == NULL) return true;
@@ -118,7 +118,7 @@ bool Tuda::writeProxyToClient()
                 maxfd = serverSocket + 1;
             }
 		}*/
-		if (LOG) printf("client %s : %d closed\n", ip, port);
+		log("client %s : %d closed\n", ip, port);
 		return false;
 	}
 	int n = 0;
@@ -136,20 +136,20 @@ bool Tuda::writeProxyToClient()
 			printf("ERROR TUDA 2: write\n");
 			close(clientSocket);
 			clientSocket = -1;
-			if (LOG) printf("client %s : %d closed\n", ip, port);
+			log("client %s : %d closed\n", ip, port);
 			return false; //что-то другое?
 		} 
 	}
 	if (n > 0) {
 		index += n;
-		if (LOG && (n > 0)) printf("proxy -> client %s : %d - %d bytes\n", ip, port, n);
+		if (n > 0) log("proxy -> client %s : %d - %d bytes\n", ip, port, n);
 	}
 	if (suda -> isEnd(index)) {
 		suda->deqCntOfReaders();
         suda = NULL;
         close(clientSocket);
 		clientSocket = -1;
-		if (LOG) printf("client %s : %d closed\n", ip, port);
+		log("client %s : %d closed\n", ip, port);
 		return false;
 	}
 	return true;
@@ -161,7 +161,7 @@ Tuda::~Tuda()
 	buf = NULL;
 	if (clientSocket != -1) {
 		close(clientSocket);
-		if (LOG) printf("client %s : %d closed\n", ip, port);
+		log("client %s : %d closed\n", ip, port);
 	}
 }
 

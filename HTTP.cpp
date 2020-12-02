@@ -1,17 +1,17 @@
 #include "biblio.h"
 #include "HTTP.h"
+
 void doOrDie(bool condition, const char* message) 
 {
 	if (condition) {
-		printf("%s\n",message);
-		exit(0);
+		throw CritException(message);
 	}
 }
 
 void doOrNot(bool condition, const char* message) 
 {
     if (condition) {
-        printf("%s\n",message);
+        printf("%s\n",message); //незначительные ошибки выводит в stdin
     }
 }
 

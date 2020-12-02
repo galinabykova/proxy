@@ -4,14 +4,14 @@
 #include "HTTP.h"
 #include "biblio.h"
 
-bool LOG_CACHE = true; //логирование: из кэша или нет
-bool LOG = true; //логирование: другие записи
+bool LOG = true; //логирование
 
-Cache cache;
+Cache cache; //используется в Tuda, он обращается к Suda через кэш. Могу передавать в конструкторе Tuda
 fd_set allset;
 int maxfd;
 
 int main(int argc, char **argv) {
+    try {
     sigset(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
     
     //РАЗБОР АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
@@ -35,13 +35,13 @@ int main(int argc, char **argv) {
     doOrDie(bv < 0, "ERROR7: unable to listen socket. Why? This is really strange");
     int flags = fcntl(listenfd, F_GETFL, 0);
     if (flags == -1) {
-        printf("ERROR MAIN fcntl 1: why?\n");
+        doOrNot(true, "ERROR MAIN fcntl 1: why?\n");
         close(listenfd);
         return 0;
     }
     flags |= O_NONBLOCK;
     if (fcntl(listenfd, F_SETFL, flags) == -1) {
-        printf("ERROR MAIN fcntl 2: why?\n");
+        doOrNot(true, "ERROR MAIN fcntl 2: why?\n");
         close(listenfd);
         return 0;
     }
@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
 
     for(;;) {
         //время от времени очищаем кэш
+        //удаляем записи, которые никто не грузит в течение долгого времени
         if (timerC >= 10000) {
             cache.clear();
             timerC = 0;
@@ -75,7 +76,7 @@ int main(int argc, char **argv) {
             if (errno == ENOMEM) {
                 tudas.pop_back();
             } else if ((errno != EINTR) && (errno != EWOULDBLOCK) && (errno != ECONNABORTED) && (errno != EPROTO)) {
-                printf("ERROR11: select. Why?\n");
+                doOrNot(true, "ERROR11: select. Why?\n");
                 exit(0);
             }
         }
@@ -89,10 +90,11 @@ int main(int argc, char **argv) {
 
             //проверяем, можем ли добавлять ещё одного клиента
             if (tudas.size() + 1 == FD_SETSIZE) {
-                printf("ERROR10: i haven't memory for new client\n");
+                doOrNot(true, "ERROR10: i haven't memory for new client\n");
                 close(connfd);
             } else {
               //  printf("1\n");
+                log("new client\n");
                 tudas.push_back(Tuda(connfd, cliaddr));    
                 FD_SET(connfd, &allset);
                 //FD_SET(sockfd, &allset);
@@ -130,8 +132,8 @@ int main(int argc, char **argv) {
         }
 
         //пробегаем все Suda
-        std :: map<std :: string, Suda*>::iterator itC = cache.m.begin(); 
-        std :: map<std :: string, Suda*>::iterator endC = cache.m.end(); 
+        std :: map<std :: string, Suda*>::iterator itC = cache.cache_entries.begin(); 
+        std :: map<std :: string, Suda*>::iterator endC = cache.cache_entries.end(); 
         while (itC != endC)
         {
             int serverSocket = (*itC).second -> serverSocket;
@@ -153,4 +155,9 @@ int main(int argc, char **argv) {
             if (nready == 0) break;
         }
     }
+} catch(CritException e) {
+    //теперь при возникновении критической ситуации сразу перейдёт сюда,
+    //а потом выйдет из функции и вызовет все деструкторы с закрытием сокетов
+    e.printError();
+}
 }

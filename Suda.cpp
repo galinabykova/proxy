@@ -8,6 +8,9 @@ Suda::Suda(Request request)
 	struct hostent* h = gethostbyname(req.host.c_str());
 	doOrNot(h == NULL, "ERROR SUDA 1: incorrect host");
 	if (h == NULL) {serverSocket = -1; error = true; return;}				//надо бы сделать исключения, но нет
+																			//здесь с исключениями сложности
+																			//если server подключится, а потом отключится и мы получим ошибку
+																			//нам будет нужно как-то сообщить о произошедшем TUDA
 	//СОКЕТ
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	doOrNot(sockfd == -1, "ERROR SUDA 2: unable to create socket");
@@ -19,7 +22,7 @@ Suda::Suda(Request request)
 		close(serverSocket);
 		serverSocket = -1;
 		error = true;
-		if (LOG) printf("%s %d closed\n", ip, port);
+		log("%s %d closed\n", ip, port);
 		return;
 	}
 	flags |= O_NONBLOCK;
@@ -28,7 +31,7 @@ Suda::Suda(Request request)
 		close(serverSocket);
 		serverSocket = -1;
 		error = true;
-		if (LOG) printf("%s %d closed\n", ip, port);
+		log("%s %d closed\n", ip, port);
 		return;
 	}
 	struct sockaddr_in servaddr;
@@ -44,7 +47,7 @@ Suda::Suda(Request request)
 			close(serverSocket);
 			serverSocket = -1;
 			error = true;
-			if (LOG) printf("%s %d closed\n", ip, port);
+			log("%s %d closed\n", ip, port);
 			return;
 		} else {
 			tryToConnectNow = true;
@@ -83,7 +86,7 @@ Suda::~Suda()
 	//printf("Suda\n");
 	if (serverSocket != -1) {
 		close(serverSocket);
-		if (LOG) printf("%s %dclosed\n", ip, port);
+		log("%s %dclosed\n", ip, port);
 	}
 	serverSocket = -1;
 	delete[] buf;
@@ -114,8 +117,8 @@ bool Suda::readServerToProxy()
 		error = true;
 		close(serverSocket);
 		serverSocket = -1;
-		if (LOG) printf("%s : %d not connected\n", ip, port);
-		if (LOG) printf("%s %dclosed\n", ip, port);
+		log("%s : %d not connected\n", ip, port);
+		log("%s %dclosed\n", ip, port);
 		return false;
 	}
 	int n = 0;
@@ -131,13 +134,13 @@ bool Suda::readServerToProxy()
 			error = true;
 			close(serverSocket);
 			serverSocket = -1;
-			if (LOG) printf("%s %d closed\n", ip, port);
+			log("%s %d closed\n", ip, port);
 			return false; //что-то другое?
 		} 
 	}
 	if (n > 0) {
 		reply.add(buf, n);
-		if (LOG && (n > 0)) printf("server %s : %d -> proxy - %d bytes\n", ip, port, n);
+		if (n > 0) log("server %s : %d -> proxy - %d bytes\n", ip, port, n);
 		if (mime == "" && code == 0) {
 			mime = reply.mime;
 			code = reply.code;
@@ -146,7 +149,7 @@ bool Suda::readServerToProxy()
 	if (reply.isEndToRead) {
 		close(serverSocket);
 		serverSocket = -1;
-		if (LOG) printf("%s %d closed\n", ip, port);
+		log("%s %d closed\n", ip, port);
 /*
 		int size = reply.v.size();
 		for (int i=0; i<size; ++i) {
@@ -181,7 +184,7 @@ bool Suda::writeProxyToServer()
 			errno = true;
 			close(serverSocket);
 			serverSocket = -1;
-			if (LOG) printf("%s %d closed\n", ip, port);
+			log("%s %d closed\n", ip, port);
 			return false; //что-то другое?
 		} 
 	}
@@ -191,7 +194,7 @@ bool Suda::writeProxyToServer()
 		}*/
 		//printf("\n");
 		indexNext +=n;
-		if (LOG && (n > 0)) printf("proxy -> server %s : %d - %d bytes\n", ip, port, n);
+		if (n > 0) log("proxy -> server %s : %d - %d bytes\n", ip, port, n);
 	}
 	return true;
 }

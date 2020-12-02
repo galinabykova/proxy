@@ -9,8 +9,8 @@ extern bool LOG;
 
 struct Cache 
 {
-	std::map <std::string, Suda*> m;
-	int ind = 0; //нужен, чтобы генерировать ключи для некэшируемых
+	std::map <std::string, Suda*> cache_entries;
+	int n_entries = 0; //нужен, чтобы генерировать ключи для некэшируемых
 
 	Cache();
 	Suda* add(Request req);

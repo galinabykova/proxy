@@ -1,7 +1,10 @@
 #ifndef _HTTP
 #define _HTTP 1
 
+#include "CritException.h"
 #include "biblio.h"
+
+#define log(...) if (LOG) fprintf(stderr, __VA_ARGS__)
 
 void doOrDie(bool condition, const char* message);
 
