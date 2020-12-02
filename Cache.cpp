@@ -46,8 +46,6 @@ void Cache::clear()
        	//тут всё равно cntOfReaders надо защитить
        	if ((*it).second -> time >= 900) {
        		if ((*it).second -> getCntOfReaders() == 0) {
-       			delete[] (*it).second;
-            (*it).second = NULL;
        			it = m.erase(it);
        			if (LOG_CACHE) printf("deleted\n");
        		} else {
@@ -55,7 +53,7 @@ void Cache::clear()
        			(*it).second -> code = 10;
        		}
        	} else {
-       		//++((*it).second -> time);
+       		++((*it).second -> time);
        	} 		
    		++it;
    	}
