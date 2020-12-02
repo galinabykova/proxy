@@ -38,7 +38,7 @@ Suda* Cache::add(Request req)
 
 void Cache::clear() 
 {
-  	/*std::map <std::string, Suda*> ::iterator it; 
+  	std::map <std::string, Suda*> ::iterator it; 
     it = m.begin(); 
     while (it != m.end())
     {
@@ -58,7 +58,7 @@ void Cache::clear()
        		//++((*it).second -> time);
        	} 		
    		++it;
-   	}*/
+   	}
 }
 
 Cache::~Cache() 

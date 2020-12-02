@@ -12,7 +12,7 @@ fd_set allset;
 int maxfd;
 
 int main(int argc, char **argv) {
-    signal(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
+    sigset(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
     
     //РАЗБОР АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
     doOrDie(argc < 2, "ERROR1: param <my port>");
