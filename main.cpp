@@ -19,9 +19,7 @@ void setEnd(int a) {
 int main(int argc, char **argv) {
     stp.sa_handler=setEnd;
     sigaction(SIGINT,&stp,0);
-    struct timeval timeout;
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
+    int listenfd = 0;
     try {
     sigset(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
 
@@ -32,7 +30,7 @@ int main(int argc, char **argv) {
     doOrDie(MY_PORT == 0, "ERROR2: incorrect <my port>"); //0 - некорректное значение, так как в этом случае порт будет выбран динамически
 
     //ДЛЯ ПРОСЛУШИВАЕМОГО СОКЕТА
-    int listenfd = socket(AF_INET, SOCK_STREAM, 0); //IPv4, потоковый сокет, протокол - по умолчанию для данного семейства и типа
+    listenfd = socket(AF_INET, SOCK_STREAM, 0); //IPv4, потоковый сокет, протокол - по умолчанию для данного семейства и типа
     doOrDie(listenfd == -1, "ERROR5: unable to create socket");
     struct sockaddr_in servaddr; //структура для адреса сокета IPv4
     memset(&servaddr, 0, sizeof(servaddr));
@@ -84,10 +82,10 @@ int main(int argc, char **argv) {
         rset = wset = allset;
         FD_CLR(listenfd, &wset);
         int nready;
-        if (isEnd) {return 0;}
-        while((nready = select(maxfd + 1, &rset, &wset, NULL, &timeout)) <= 0) {
+        if (isEnd) {close(listenfd); return 0;}
+        while((nready = select(maxfd + 1, &rset, &wset, NULL, NULL)) <= 0) {
+            if (isEnd) {close(listenfd); return 0;}
             if (nready == 0) continue;
-            if (isEnd) {return 0;}
             if (errno == ENOMEM) {
                 tudas.pop_back();
             }  else if ((errno != EINTR) && (errno != EWOULDBLOCK) && (errno != ECONNABORTED) && (errno != EPROTO)) {
@@ -95,7 +93,6 @@ int main(int argc, char **argv) {
                 break;
             }
         }
-
         if (FD_ISSET(listenfd, &rset)) {
             //ДЛЯ ПРИСОЕДИНЁННОГО СОКЕТА КЛИЕНТ - ПРОКСИ
             struct sockaddr_in cliaddr;
@@ -174,5 +171,6 @@ int main(int argc, char **argv) {
     //теперь при возникновении критической ситуации сразу перейдёт сюда,
     //а потом выйдет из функции и вызовет все деструкторы с закрытием сокетов
     e.printError();
+    if (listenfd) close(listenfd); 
 }
 }
