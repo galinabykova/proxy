@@ -1,6 +1,6 @@
 #include "Tuda.h"
 
-Tuda::Tuda(int clSocket, sockaddr_in cliaddr) 
+Tuda::Tuda(int clSocket, sockaddr_in cliaddr, Cache& c) : cache(c)
 {
 	clientSocket = clSocket;
 	int flags = fcntl(clientSocket, F_GETFL, 0);
@@ -24,7 +24,7 @@ Tuda::Tuda(int clSocket, sockaddr_in cliaddr)
 
 //при копировании данные из буфера теряются, но они вроде и не нужны
 //и то, откуда скопировали не надо больше использовать
-Tuda::Tuda(const Tuda &copy) 
+Tuda::Tuda(const Tuda &copy) : cache(copy.cache)
 {
 	clientSocket = copy.clientSocket;
 	req = copy.req;

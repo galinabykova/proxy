@@ -6,14 +6,13 @@
 
 bool LOG = true; //логирование
 
-Cache cache; //используется в Tuda, он обращается к Suda через кэш. Могу передавать в конструкторе Tuda
 fd_set allset;
 int maxfd;
 
 int main(int argc, char **argv) {
     try {
     sigset(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
-    
+    Cache cache = Cache();
     //РАЗБОР АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
     doOrDie(argc < 2, "ERROR1: param <my port>");
     int MY_PORT = atoi(argv[1]);
@@ -95,7 +94,7 @@ int main(int argc, char **argv) {
             } else {
               //  printf("1\n");
                 log("new client\n");
-                tudas.push_back(Tuda(connfd, cliaddr));    
+                tudas.push_back(Tuda(connfd, cliaddr, cache));    
                 FD_SET(connfd, &allset);
                 //FD_SET(sockfd, &allset);
                 if (maxfd < connfd) {

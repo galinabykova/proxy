@@ -13,6 +13,7 @@ extern fd_set allset;
 extern int maxfd;
 
 struct Tuda {
+	Cache& cache;
 	int clientSocket;
 
 	//для получения GET запроса
@@ -29,7 +30,7 @@ struct Tuda {
 
 	bool error = false;
 
-	Tuda(int clSocket, sockaddr_in cliaddr);
+	Tuda(int clSocket, sockaddr_in cliaddr, Cache& c);
 	Tuda(const Tuda &copy);
 
 	Tuda& operator= (const Tuda &tuda) = delete; 

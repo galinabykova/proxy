@@ -47,7 +47,9 @@ void Cache::clear()
        	//тут всё равно cntOfReaders надо защитить
        	if ((*it).second -> time >= 900) {
        		if ((*it).second -> getCntOfReaders() == 0) {
+            Suda* ptr = (*it).second;
        			it = cache_entries.erase(it);
+            delete ptr;
        			log("deleted\n");
        		} else {
        			if ((*it).second -> code != 10) log("time to use the recording in cache is over\n");
