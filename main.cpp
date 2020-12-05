@@ -8,10 +8,23 @@ bool LOG = true; //логирование
 
 fd_set allset;
 int maxfd;
+bool isEnd = false;
+
+struct sigaction stp;
+
+void setEnd(int a) {
+    isEnd = true;
+}
 
 int main(int argc, char **argv) {
+    stp.sa_handler=setEnd;
+    sigaction(SIGINT,&stp,0);
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
     try {
     sigset(SIGPIPE, SIG_IGN); //SIGPIPE посылается, когда сокет, в который я пишу, закрывается с другой стороны
+
     Cache cache = Cache();
     //РАЗБОР АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
     doOrDie(argc < 2, "ERROR1: param <my port>");
@@ -56,10 +69,10 @@ int main(int argc, char **argv) {
     //для очистки кэша. Запись актуальна какое-то время после её появления и хранится, пока есть хоть один связанный с ней Tuda
     int timerC = 0;
 
-    for(;;) {
+    while(!isEnd) {
         //время от времени очищаем кэш
         //удаляем записи, которые никто не грузит в течение долгого времени
-        if (timerC >= 10000) {
+        if (timerC >= 100000) {
             cache.clear();
             timerC = 0;
             //printf("1\n");
@@ -71,12 +84,15 @@ int main(int argc, char **argv) {
         rset = wset = allset;
         FD_CLR(listenfd, &wset);
         int nready;
-        while((nready = select(maxfd + 1, &rset, &wset, NULL, NULL)) <= 0) {
+        if (isEnd) {return 0;}
+        while((nready = select(maxfd + 1, &rset, &wset, NULL, &timeout)) <= 0) {
+            if (nready == 0) continue;
+            if (isEnd) {return 0;}
             if (errno == ENOMEM) {
                 tudas.pop_back();
-            } else if ((errno != EINTR) && (errno != EWOULDBLOCK) && (errno != ECONNABORTED) && (errno != EPROTO)) {
+            }  else if ((errno != EINTR) && (errno != EWOULDBLOCK) && (errno != ECONNABORTED) && (errno != EPROTO)) {
                 doOrNot(true, "ERROR11: select. Why?\n");
-                exit(0);
+                break;
             }
         }
 

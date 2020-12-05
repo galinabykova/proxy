@@ -64,11 +64,11 @@ void Cache::clear()
 
 Cache::~Cache() 
 {
-	std::map <std::string, Suda*> ::iterator it; 
+	  std::map <std::string, Suda*> ::iterator it; 
     it = cache_entries.begin(); 
     while (it != cache_entries.end())
     {
-      	delete[] (*it).second;  
+      	delete (*it).second;  
        	++it; 
     }
 }
